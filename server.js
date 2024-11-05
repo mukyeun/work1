@@ -47,6 +47,58 @@ app.get('/api/health-data', async (req, res) => {
   }
 });
 
+// 단일 건강 데이터 조회
+app.get('/api/health-data/:id', async (req, res) => {
+  try {
+    const data = await HealthData.findById(req.params.id);
+    if (!data) {
+      return res.status(404).json({ message: 'Data not found' });
+    }
+    res.json(data);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// 건강 데이터 수정
+app.put('/api/health-data/:id', async (req, res) => {
+  try {
+    const data = await HealthData.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true }
+    );
+    if (!data) {
+      return res.status(404).json({ message: 'Data not found' });
+    }
+    res.json(data);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
+// 건강 데이터 삭제
+app.delete('/api/health-data/:id', async (req, res) => {
+  try {
+    const data = await HealthData.findByIdAndDelete(req.params.id);
+    if (!data) {
+      return res.status(404).json({ message: 'Data not found' });
+    }
+    res.json({ message: 'Data deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// BMI 자동 계산 미들웨어
+app.use('/api/health-data', (req, res, next) => {
+  if (req.body.height && req.body.weight) {
+    const heightInMeters = req.body.height / 100;
+    req.body.bmi = (req.body.weight / (heightInMeters * heightInMeters)).toFixed(2);
+  }
+  next();
+});
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
