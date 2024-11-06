@@ -1,67 +1,31 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
-  TextField,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  Grid,
   Box,
+  TextField,
   Button,
   Typography,
-  Autocomplete,
-  Checkbox,
-  FormControlLabel,
-  RadioGroup,
-  Radio
+  Paper,
+  FormControl,
+  Select,
+  MenuItem,
+  Chip,
+  InputAdornment
 } from '@mui/material';
 
-const HealthForm = ({ 환자정보, 저장하기 }) => {
+const HealthForm = ({ onSubmit }) => {
   const [formData, setFormData] = useState({
-    // 기본 정보
     이름: '',
-    연락처: '',
     주민등록번호: '',
+    연락처: '',
     키: '',
-    체중: '',
-    혈당: '',
-    체온: '',
-    BMI: '',
-    
-    // 성격 및 체질
-    성격: '',
-    형기체질: '',
-    
-    // 건강 상태
-    아픈부위: [],
-    복용약물: [],
-    복용기간: '',
-    
-    // 생활 습관
+    몸무게: '',
+    혈액형: '',
+    특이사항: '',
     육체노동: '',
     스트레스: '',
-    기호식: [],
     운동: '',
-    
-    // 추가 정보
-    맥파: '',
-    메모: ''
+    기호식: []
   });
-
-  // BMI 자동 계산
-  useEffect(() => {
-    if (formData.키 && formData.체중) {
-      const 키_미터 = formData.키 / 100;
-      const bmi = (formData.체중 / (키_미터 * 키_미터)).toFixed(1);
-      setFormData(prev => ({ ...prev, BMI: bmi }));
-    }
-  }, [formData.키, formData.체중]);
-
-  // 나이에 따른 형기체질 옵션
-  const get형기체질옵션 = (주민번호) => {
-    // 나이 계산 로직 구현
-    // 세대별 형기체질 옵션 반환
-  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -71,36 +35,28 @@ const HealthForm = ({ 환자정보, 저장하기 }) => {
     }));
   };
 
-  const 성격옵션 = ['매우 급함', '급함', '보통', '느긋', '매우 느긋'];
-  const 복용기간옵션 = ['3개월 이내', '6개월 이내', '1년 이내', '1년 이상'];
-  const 정도옵션 = ['매우 많음', '많음', '보통', '적음', '매우 적음'];
-
-  const onSubmit = (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    if (typeof 저장하기 === 'function') {
-      저장하기(formData);
-    }
+    onSubmit(formData);
   };
 
-  const textFieldStyle = {
-    '& .MuiOutlinedInput-root': {
-      backgroundColor: 'white',
-      '& fieldset': {
-        borderColor: '#e0e0e0',
-      },
-      '&:hover fieldset': {
-        borderColor: '#bdbdbd',
-      },
-    },
-    '& .MuiInputLabel-root': {
-      display: 'none'  // 라벨 숨기기
-    }
+  const 기호식_옵션 = ['술', '담배', '커피', '탄산음료', '매운음식', '짠음식', '단음식'];
+
+  const handleHabitToggle = (habit) => {
+    setFormData(prev => ({
+      ...prev,
+      기호식: prev.기호식.includes(habit)
+        ? prev.기호식.filter(item => item !== habit)
+        : [...prev.기호식, habit]
+    }));
   };
 
   return (
-    <Box component="form" onSubmit={onSubmit} sx={{ mt: 2 }}>
-      <Grid container spacing={2}>
-        <Grid item xs={12} sm={6}>
+    <Paper elevation={1} sx={{ p: 3, maxWidth: 800, margin: 'auto', borderRadius: '8px' }}>
+      <form onSubmit={handleSubmit}>
+        <Typography variant="h6" sx={{ mb: 3, fontWeight: 'normal' }}>기본 정보</Typography>
+        
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           <TextField
             fullWidth
             placeholder="이름"
@@ -108,10 +64,8 @@ const HealthForm = ({ 환자정보, 저장하기 }) => {
             value={formData.이름}
             onChange={handleChange}
             variant="outlined"
-            sx={textFieldStyle}
           />
-        </Grid>
-        <Grid item xs={12} sm={6}>
+
           <TextField
             fullWidth
             placeholder="주민등록번호"
@@ -119,10 +73,8 @@ const HealthForm = ({ 환자정보, 저장하기 }) => {
             value={formData.주민등록번호}
             onChange={handleChange}
             variant="outlined"
-            sx={textFieldStyle}
           />
-        </Grid>
-        <Grid item xs={12} sm={6}>
+
           <TextField
             fullWidth
             placeholder="연락처"
@@ -130,40 +82,34 @@ const HealthForm = ({ 환자정보, 저장하기 }) => {
             value={formData.연락처}
             onChange={handleChange}
             variant="outlined"
-            sx={textFieldStyle}
           />
-        </Grid>
-        <Grid item xs={12} sm={6}>
-          <TextField
-            fullWidth
-            placeholder="키"
-            name="키"
-            value={formData.키}
-            onChange={handleChange}
-            variant="outlined"
-            type="number"
-            InputProps={{
-              endAdornment: 'cm'
-            }}
-            sx={textFieldStyle}
-          />
-        </Grid>
-        <Grid item xs={12} sm={6}>
-          <TextField
-            fullWidth
-            placeholder="몸무게"
-            name="몸무게"
-            value={formData.몸무게}
-            onChange={handleChange}
-            variant="outlined"
-            type="number"
-            InputProps={{
-              endAdornment: 'kg'
-            }}
-            sx={textFieldStyle}
-          />
-        </Grid>
-        <Grid item xs={12} sm={6}>
+
+          <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
+            <TextField
+              fullWidth
+              placeholder="키"
+              name="키"
+              value={formData.키}
+              onChange={handleChange}
+              InputProps={{
+                endAdornment: <InputAdornment position="end">cm</InputAdornment>,
+              }}
+              variant="outlined"
+            />
+
+            <TextField
+              fullWidth
+              placeholder="몸무게"
+              name="몸무게"
+              value={formData.몸무게}
+              onChange={handleChange}
+              InputProps={{
+                endAdornment: <InputAdornment position="end">kg</InputAdornment>,
+              }}
+              variant="outlined"
+            />
+          </Box>
+
           <TextField
             fullWidth
             placeholder="혈액형"
@@ -171,36 +117,102 @@ const HealthForm = ({ 환자정보, 저장하기 }) => {
             value={formData.혈액형}
             onChange={handleChange}
             variant="outlined"
-            sx={textFieldStyle}
           />
-        </Grid>
-        <Grid item xs={12}>
+
           <TextField
             fullWidth
             placeholder="특이사항"
             name="특이사항"
+            multiline
+            rows={4}
             value={formData.특이사항}
             onChange={handleChange}
             variant="outlined"
-            multiline
-            rows={3}
-            sx={textFieldStyle}
           />
-        </Grid>
-        <Grid item xs={12}>
-          <Box sx={{ display: 'flex', justifyContent: 'flex-start', mt: 1 }}>
-            <Button 
-              type="submit" 
-              variant="contained" 
-              color="primary"
-              size="small"
-            >
-              저장
-            </Button>
+        </Box>
+
+        <Typography variant="h6" sx={{ mb: 3, mt: 4, fontWeight: 'normal' }}>생활습관</Typography>
+        
+        <Box sx={{ display: 'grid', gap: 2, mb: 3 }}>
+          <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 2 }}>
+            <FormControl fullWidth>
+              <Select
+                value={formData.육체노동}
+                onChange={handleChange}
+                name="육체노동"
+                displayEmpty
+                renderValue={value => value || "육체노동"}
+              >
+                {['매우 많음', '많음', '보통', '적음', '매우 적음'].map(option => (
+                  <MenuItem key={option} value={option}>{option}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+
+            <FormControl fullWidth>
+              <Select
+                value={formData.스트레스}
+                onChange={handleChange}
+                name="스트레스"
+                displayEmpty
+                renderValue={value => value || "스트레스"}
+              >
+                {['매우 많음', '많음', '보통', '적음', '매우 적음'].map(option => (
+                  <MenuItem key={option} value={option}>{option}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+
+            <FormControl fullWidth>
+              <Select
+                value={formData.운동}
+                onChange={handleChange}
+                name="운동"
+                displayEmpty
+                renderValue={value => value || "운동"}
+              >
+                {['매우 많음', '많음', '보통', '적음', '매우 적음'].map(option => (
+                  <MenuItem key={option} value={option}>{option}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
           </Box>
-        </Grid>
-      </Grid>
-    </Box>
+
+          <Typography variant="subtitle2" sx={{ mt: 1 }}>기호식</Typography>
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+            {기호식_옵션.map((habit) => (
+              <Chip
+                key={habit}
+                label={habit}
+                onClick={() => handleHabitToggle(habit)}
+                color={formData.기호식.includes(habit) ? "primary" : "default"}
+                sx={{
+                  borderRadius: '16px',
+                  '&.MuiChip-colorPrimary': {
+                    backgroundColor: '#4a77d4',
+                  }
+                }}
+              />
+            ))}
+          </Box>
+        </Box>
+
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+          <Button
+            type="submit"
+            variant="contained"
+            sx={{
+              bgcolor: '#4a77d4',
+              '&:hover': {
+                bgcolor: '#3a67c4',
+              }
+            }}
+          >
+            저장
+          </Button>
+        </Box>
+      </form>
+    </Paper>
   );
 };
 
